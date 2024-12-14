@@ -1,3 +1,12 @@
-# fengyegushi-2024
+# 枫叶故事 2024-2025
 
-枫叶 24 年底新版枫叶搭建
+新枫叶故事
+
+## 技术栈
+
+vue+ts
+
+### 搭建参考
+
+https://juejin.cn/post/7228990409909108793?searchId=2024121500131157B8D091022C36620D4A
+https://gitee.com/youlaiorg/vue3-element-admin/blob/master/src/plugins/index.ts
