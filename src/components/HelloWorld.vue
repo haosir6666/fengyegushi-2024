@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import variables from "@/styles/variables.module.scss";
-import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
 defineProps<{ msg: string }>()
 console.log(import.meta.env.VITE_APP_TITLE)
 const count = ref(0)
@@ -14,7 +12,6 @@ const count = ref(0)
   <div class="card" :style="{ 'background-color': variables.bgColor }">
     <button type="button" @click="count++">count is {{ count }}</button>
     <p class="text-red">
-      {{  t("hello")}}
     </p>
   </div>
 

@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-
+import type { App } from "vue";
 export const Layout = () => import("@/layout/index.vue");
 
 // 静态路由
@@ -15,13 +15,6 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
-
-  {
-    path: "/login",
-    component: () => import("@/views/login/index.vue"),
-    meta: { hidden: true },
-  },
-
   {
     path: "/",
     component: Layout,
@@ -47,12 +40,9 @@ const router = createRouter({
   scrollBehavior: () => ({ left: 0, top: 0 }),
 });
 
-/**
- * 重置路由
- */
-export function resetRouter() {
-  router.replace({ path: "/login" });
-  location.reload();
+// 全局注册 router
+export function setupRouter(app: App) {
+  app.use(router);
 }
 
 export default router;

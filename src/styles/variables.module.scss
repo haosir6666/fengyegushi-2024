@@ -1,4 +1,5 @@
 // 导出 variables.scss 文件的变量 这样可以在ts中使用
 :export {
   bgColor: $bg-color;
+  colorPrimary: $color-primary;
 }

@@ -12,6 +12,14 @@ interface ImportMetaEnv {
    * API基础路径(反向代理)
    */
   VITE_APP_BASE_API: string;
+  /**
+   * 接口地址
+   */
+  VITE_AXIOS_BASE_URL: string;
+  /**
+   * 超时时间
+   */
+  VITE_AXIOS_TIMEOUT: number;
 }
 
 interface ImportMeta {
