@@ -90,6 +90,38 @@ export const randomString = (len: number) => {
   return randomStr;
 };
 /**
+ * 复制文本到剪贴板
+ * @param text 要复制的文本
+ * @returns
+ */
+export function copyToClipboard(text: string) {
+  // 创建一个隐藏的文本区域
+  const textArea = document.createElement("textarea");
+  textArea.value = text; // 将要复制的文本赋值给文本区域
+
+  // 使文本区域不可见
+  textArea.style.position = "fixed"; // Prevent scrolling to bottom of the page in MS Edge.
+  textArea.style.opacity = "0"; // 使区域透明
+  document.body.appendChild(textArea); // 将文本区域添加到文档中
+
+  // 选中区域的文本
+  textArea.select();
+  textArea.setSelectionRange(0, 99999); // 对于手机
+
+  // 执行复制命令
+  const successful = document.execCommand("copy");
+
+  // 移除文本区域
+  document.body.removeChild(textArea);
+
+  if (successful) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/**
  * 首字母大写
  * @param str
  * @returns
@@ -120,6 +152,7 @@ export const getKebabCase = (str: string) => {
  * @returns
  */
 export const getCamelCase = (str: string) => {
+  //@ts-ignore
   return str.replace(/-([a-z])/g, (i, item) => item.toUpperCase());
 };
 /**
@@ -203,6 +236,7 @@ export const intToChinese = (value: number) => {
     "亿",
   ];
   const num = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+  //@ts-ignore
   return str.replace(/([1-9]|0+)/g, ($, $1, idx, full) => {
     let pos = 0;
     if ($1[0] !== "0") {

@@ -1,89 +1,108 @@
+import type {
+  AxiosInstance,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { useAuthStore } from "@/store";
 import { resolveResError } from "./helpers";
-import {
-  AxiosInstance,
-  InternalAxiosRequestConfig,
-  AxiosResponse,
-  AxiosHeaders,
-} from "axios";
+import { message as AntMessage } from "ant-design-vue";
 
-// 扩展 InternalAxiosRequestConfig
-interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
-  needTip?: boolean; // 添加 needTip 属性
-  needToken?: boolean; // 添加 needToken 属性
-}
+const SUCCESS_CODES = [200] as const;
 
-export function setupInterceptors(axiosInstance: AxiosInstance) {
-  const SUCCESS_CODES = [0, 200, 1, 2, 3];
-
-  function resResolve(
-    response: AxiosResponse,
-    config: CustomAxiosRequestConfig
-  ): Promise<any> {
-    const { data, status, statusText, headers } = response;
-    if (headers["content-type"]?.includes("json")) {
-      if (SUCCESS_CODES.includes(data?.code)) {
-        return Promise.resolve(data);
-      }
-      const code = data?.code ?? status;
-
-      const needTip = config.needTip !== false;
-
-      const message = resolveResError(code, data?.msg ?? statusText, needTip);
-
-      return Promise.reject({ code, message, error: data ?? response });
-    }
-    return Promise.resolve(data ?? response);
-  }
-
-  axiosInstance.interceptors.request.use(reqResolve, reqReject);
+export function setupInterceptors(axiosInstance: AxiosInstance): void {
+  axiosInstance.interceptors.request.use(
+    requestInterceptor,
+    requestErrorHandler
+  );
   axiosInstance.interceptors.response.use(
-    (response) =>
-      resResolve(response, response.config as CustomAxiosRequestConfig),
-    resReject
+    responseInterceptor,
+    responseErrorHandler
   );
 }
 
-function reqResolve(
-  config: CustomAxiosRequestConfig
-): CustomAxiosRequestConfig {
+function requestInterceptor(
+  config: InternalAxiosRequestConfig
+): InternalAxiosRequestConfig {
   if (config.needToken === false) {
     return config;
   }
 
   const { accessToken } = useAuthStore();
   if (accessToken) {
-    // 确保 headers 存在
-    if (!config.headers) {
-      config.headers = new AxiosHeaders();
-    }
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
 
   return config;
 }
 
-function reqReject(error: any): Promise<never> {
+function requestErrorHandler(error: any): Promise<never> {
   return Promise.reject(error);
 }
 
-async function resReject(error: any): Promise<never> {
-  if (!error || !error.response) {
-    const code = error?.code;
-    const message = resolveResError(code, error.msg);
-    return Promise.reject({ code, message, error });
+function responseInterceptor(response: AxiosResponse): Promise<any> {
+  const { data, status, statusText, headers, config } = response;
+
+  if (headers["content-type"]?.includes("json")) {
+    if (SUCCESS_CODES.includes(data?.code)) {
+      return Promise.resolve(data);
+    }
+
+    const code = data?.code ?? status;
+    const needTip = config.needTip !== false;
+    const errorMessage = resolveResError(
+      code,
+      data?.message ?? statusText,
+      needTip
+    );
+
+    if (needTip) {
+      return Promise.reject({
+        code,
+        message: errorMessage,
+        data: data ?? null,
+      });
+    }
+
+    return Promise.resolve({
+      code,
+      message: "Ignored error",
+      data: data ?? null,
+    });
   }
 
-  const { data, status, config, statusText } = error.response;
+  return Promise.resolve(data);
+}
+
+function responseErrorHandler(error: any): Promise<never> {
+  const response = error.response;
+  const needTip = response?.config?.needTip !== false;
+
+  if (!response) {
+    if (needTip) {
+      AntMessage.error("網路錯誤");
+    }
+    return Promise.reject({
+      code: -1,
+      message: "網路錯誤",
+      data: error,
+    });
+  }
+
+  const { data, status, statusText } = response;
   const code = data?.code ?? status;
+  const errorMessage = resolveResError(
+    code,
+    data?.message ?? statusText,
+    needTip
+  );
 
-  const customConfig = config as CustomAxiosRequestConfig;
-  const needTip = customConfig.needTip !== false;
+  if (needTip) {
+    AntMessage.error(errorMessage);
+  }
 
-  const message = resolveResError(code, data?.msg ?? statusText, needTip);
   return Promise.reject({
     code,
-    message,
-    error: error.response?.data || error.response,
+    message: errorMessage,
+    data: data || response,
   });
 }

@@ -1,7 +1,7 @@
 <template>
     <div class="layout position-relative w-full h-full">
         <Header class="position-absolute w-full" />
-        <router-view class="w-full h-full bg-gray-100 pt-68px" v-slot="{ Component, route: curRoute }">
+        <router-view class="w-full h-full bg-gray-100 " v-slot="{ Component, route: curRoute }">
             <transition name="fade-slide" mode="out-in" appear>
                 <component :is="Component" :key="curRoute.fullPath" />
             </transition>

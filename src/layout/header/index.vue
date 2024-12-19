@@ -20,6 +20,6 @@ import Menu from './menu.vue';
 <style scoped lang="scss">
 .header {
     border-radius: 0 0 20px 20px;
-    background-color: rgba(254, 244, 202, 0.8);
+    background-color: $h-bg-color;
 }
 </style>

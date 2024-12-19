@@ -26,6 +26,19 @@ export const constantRoutes: RouteRecordRaw[] = [
         name: "home",
         meta: { title: "home", icon: "homepage", affix: true },
       },
+      {
+        path: "userCenter",
+        component: () => import("@/views/userCenter/index.vue"),
+        name: "userCenter",
+        meta: { title: "userCenter", icon: "homepage", affix: true },
+      },
+      {
+        path: "sponsor",
+        component: () =>
+          import("@/views/userCenter/components/userMoney/sponsor.vue"),
+        name: "sponsor",
+        meta: { title: "sponsor", icon: "sponsor", affix: true },
+      },
     ],
   },
 ];

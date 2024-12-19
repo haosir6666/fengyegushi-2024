@@ -1,77 +1,36 @@
-import { useAuthStore } from "@/store";
-import { Modal, notification } from "ant-design-vue";
-import { createVNode } from "vue";
-import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
+import { useAuthStore, useAppStore } from "@/store";
+import { notification } from "ant-design-vue";
 let isConfirming = false;
 export function resolveResError(
-  code: number,
+  code: number | string,
   message: string | undefined,
   needTip = true
 ) {
   switch (code) {
     case 401:
+    case 402:
+    case 410:
       if (isConfirming || !needTip) return;
       isConfirming = true;
-      Modal.confirm({
-        title: "提示",
-        icon: createVNode(ExclamationCircleOutlined),
-        content: `登入已過期，是否重新登入？`,
-        onOk() {
-          useAuthStore().logout();
-          isConfirming = false;
-          notification["success"]({
-            message: "消息",
-            description: "已退出登入",
-          });
-        },
-        onCancel() {
-          isConfirming = false;
-        },
+      notification["warning"]({
+        message: "提示",
+        description: code === 410 ? `請先登錄` : `登入已過期，請重新登入？`,
       });
-      return false;
-    case 11007:
-    case 11008:
-      if (isConfirming || !needTip) return;
-      isConfirming = true;
-      Modal.confirm({
-        title: "提示",
-        icon: createVNode(ExclamationCircleOutlined),
-        content: `${message}，是否重新登入？`,
-        onOk() {
-          useAuthStore().logout();
-          isConfirming = false;
-          notification["success"]({
-            message: "消息",
-            description: "已退出登入",
-          });
-        },
-        onCancel() {
-          isConfirming = false;
-        },
-      });
-      return false;
-    case 203:
-      if (isConfirming || !needTip) return;
-      isConfirming = true;
-      Modal.confirm({
-        title: "提示",
-        icon: createVNode(ExclamationCircleOutlined),
-        content: `登入已過期，是否重新登入？`,
-        onOk() {
-          useAuthStore().logout();
-          isConfirming = false;
-          notification["success"]({
-            message: "消息",
-            description: "已退出登入",
-          });
-        },
-        onCancel() {
-          isConfirming = false;
-        },
-      });
+      useAuthStore().logout();
+      useAppStore().handleLoginBox(true);
+      isConfirming = false;
       return false;
     case 403:
       message = "請求被拒絕";
+      break;
+    case 429:
+      message = "係統繁忙，請稍後重試";
+      break;
+    case -999:
+      message = "係統維護中";
+      break;
+    case 99:
+      message = "網路繁忙或數據發生變更，請刷新後重試";
       break;
     case 404:
       message = "請求資源或接口不存在";
@@ -88,7 +47,7 @@ export function resolveResError(
   }
   needTip &&
     notification["error"]({
-      message: "错误",
+      message: "錯誤",
       description: message,
     });
   return message;

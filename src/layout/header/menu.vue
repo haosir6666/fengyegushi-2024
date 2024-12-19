@@ -1,7 +1,7 @@
 <template>
     <div class="menu w-full h-full  flex justify-center items-center">
         <a-flex class="h-full w-full flex justify-center items-center" :vertical="value === 'vertical'">
-            <div :class="`menu-item cursor-pointer `" v-for="(item, index) in menu" :key="index" v-show="item.isShow"
+            <div :class="`menu-item `" v-for="(item, index) in menu" :key="index" v-show="item.isShow"
                 @click="handleClick(item)">
                 <p :class="`${isActived(item.path)}`">{{ item.name }}</p>
             </div>
@@ -18,7 +18,7 @@ import router from '@/router';
 const value = ref('horizontal');
 const menu = ref<meunType[]>([
     { name: '首页', path: '/home', isShow: true, openUrl: false },
-    { name: '关于我们', path: '/redirect', isShow: true, openUrl: false },
+    { name: '关于我们', path: '/redirect', isShow: false, openUrl: false },
     { name: '测试imonials', path: '/about', isShow: false, openUrl: true },
 ])
 

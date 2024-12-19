@@ -3,35 +3,49 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  cursor: url(@/assets/images/cursor.cur), auto !important;
+  cursor: url(@/assets/images/cursor/cursor.cur), auto;
 }
+
+.cursor-default {
+  cursor: url(@/assets/images/cursor/cursor.cur), auto !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   user-select: none;
   -webkit-user-drag: none; //禁止图片拖动
+  color: $text-color;
 }
 
 #app {
   width: 100%;
   height: 100%;
 }
-
+.btn-auth {
+  color: $color-primary;
+  border: 1px solid $color-primary;
+  background-color: rgba($color: $color-primary, $alpha: 0.3);
+}
 /* transition fade-slide */
 .fade-slide-leave-active,
 .fade-slide-enter-active {
   transition: all 0.2s;
 }
+//路由切换动画
+// .fade-slide-enter-from {
+// }
 
-.fade-slide-enter-from {
-  opacity: 1;
+// .fade-slide-leave-to {
+// }
+.hidden-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  &::-webkit-scrollbar {
+    display: none; /* Chrome Safari */
+  }
 }
-
-.fade-slide-leave-to {
-  opacity: 0;
-}
-
 /* 自定义滚动条样式 */
 .cus-scroll {
   overflow: auto;

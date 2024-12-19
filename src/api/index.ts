@@ -3,11 +3,13 @@ interface EmailCodeData {
   email: string;
   type: 1 | 2 | 3;
 }
+interface PhoneCodeData {
+  phone: string;
+  type: 1;
+}
 interface loginData {
   username: string;
   password: string;
-  uuid: string;
-  code: string;
 }
 interface responseData {
   code: number;
@@ -16,8 +18,11 @@ interface responseData {
 }
 
 export default {
-  // 获取用户信息
-  getUser: (): Promise<responseData> => request.get("/sys/user/loadUserInfo"),
+  /**
+   * 获取用户信息
+   * @returns
+   */
+  getUserInfo: (): Promise<responseData> => request.get("/user/loadUserInfo"),
   // 登录
   login: (data: loginData): Promise<responseData> =>
     request.post("/sys/login/user", data),
@@ -25,6 +30,14 @@ export default {
   logout: (): Promise<responseData> =>
     //@ts-ignore
     request.get("/sys/user/logout", {}, { needTip: false }),
+  /**
+   * 發送短信验证码
+   * @param data
+   * @returns
+   */
+  sendPhoneCode: (data: PhoneCodeData): Promise<responseData> =>
+    request.post("/util/sendPhoneCode", data),
+
   /**
    * @description: 获取图形验证码
    */
