@@ -39,13 +39,13 @@ const columns = [
         width: 100
     },
     {
-        title: '獲得的返利金額',
+        title: '贊助金額',
         dataIndex: 'amount',
         key: 'amount',
         width: 100
     },
     {
-        title: '充值时间',
+        title: '贊助时间',
         dataIndex: 'createTime',
         key: 'createTime',
         width: 100
@@ -62,7 +62,6 @@ const fetchData = async (page: number, pageSize: number) => {
         if (res.code === 200) {
             data.value = res.data.dataList
             pagination.value.total = res.data.count
-            totalRebates.value = res.data.totalRebates || 0
         }
     } catch (error) {
         console.error('獲取返利列表失敗:', error)
@@ -80,11 +79,12 @@ const onTableChange = (paginationConfig: TablePaginationConfig) => {
 }
 const loadRebatesNum = async () => {
     try {
-        let { code, data } = await api.readRebatesNum()
+        const { code, data } = await api.readRebatesNum()
         if (code === 200) {
-            totalRebates.value = data
+            totalRebates.value = Number(data) || 0
         }
-    } finally {
+    } catch (e) {
+        console.error('獲取返利總額失敗:', e)
         totalRebates.value = 0
     }
 }

@@ -16,7 +16,7 @@ type UserInfo = {
 export const useAuthStore = defineStore(
   "token",
   () => {
-    const accessToken = ref("123");
+    const accessToken = ref("");
     const userInfo = ref<UserInfo>({
       id: null,
       username: null,
@@ -41,6 +41,7 @@ export const useAuthStore = defineStore(
 
     const logout = () => {
       accessToken.value = "";
+      router.push("/home");
       userInfo.value = {
         id: null,
         username: null,
@@ -52,7 +53,6 @@ export const useAuthStore = defineStore(
         bindingUser: null,
         avatar: "",
       };
-      router.push("/home");
     };
 
     return { accessToken, setAccessToken, logout, userInfo, setUserInfo };

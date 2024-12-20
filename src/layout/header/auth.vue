@@ -1,8 +1,6 @@
 <template>
     <div class="auth h-full flex items-center justify-end">
-        <a-button v-if="!authStore.accessToken" class='btn-auth cursor-default'
-            @click="appStore.handleLoginBox(true)"><a>登录 | 注册</a></a-button>
-        <a-dropdown v-else>
+        <a-dropdown v-if="authStore.accessToken">
             <a-avatar size="default" :src="authStore.userInfo.avatar">
             </a-avatar>
             <template #overlay>
@@ -18,6 +16,8 @@
                 </a-menu>
             </template>
         </a-dropdown>
+        <a-button v-else class='btn-auth cursor-default' @click="appStore.handleLoginBox(true)"><a>登录 |
+                注册</a></a-button>
     </div>
 </template>
 

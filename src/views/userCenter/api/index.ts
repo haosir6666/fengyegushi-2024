@@ -19,10 +19,10 @@ const api = {
     request.get("/invite/queryPage", { params }),
 
   weChat: (amount: number): Promise<ResponseData<string>> =>
-    request.post("/pay/weChat", { amount }),
+    request.post("/pay/weChat/?amount=" + amount),
 
   aliPay: (amount: number): Promise<ResponseData<string>> =>
-    request.post("/pay/aliPay", { amount }),
+    request.post("/pay/aliPay/?amount=" + amount),
 
   payOrderOn: (orderOn: string): Promise<ResponseData<boolean>> =>
     request.get(`/pay/payOrderOn/${orderOn}`),
@@ -35,7 +35,7 @@ const api = {
   readRebatesList: (
     params: PageParams
   ): Promise<ResponseData<RebatePageResult>> =>
-    request.get("/invite/queryPageInvitePay", {
+    request.get("/invite/rebate/queryPageInvitePay", {
       params,
       needTip: false,
     }),
@@ -44,7 +44,7 @@ const api = {
    * @returns
    */
   readRebatesNum: (): Promise<ResponseData> =>
-    request.get("/invite/loadInvitePaySum"),
+    request.get("/invite/rebate/loadInvitePaySum"),
 };
 
 export default api;

@@ -17,9 +17,9 @@ import router from '@/router';
 
 const value = ref('horizontal');
 const menu = ref<meunType[]>([
-    { name: '首页', path: '/home', isShow: true, openUrl: false },
-    { name: '关于我们', path: '/redirect', isShow: false, openUrl: false },
-    { name: '测试imonials', path: '/about', isShow: false, openUrl: true },
+    { name: '首頁', path: '/home', isShow: true, openUrl: false },
+    { name: '關於我們', path: '/redirect', isShow: false, openUrl: false },
+    { name: '測試imonials', path: '/about', isShow: false, openUrl: true },
 ])
 
 function isActived(path: string) {
@@ -31,7 +31,7 @@ function handleClick(item: meunType) {
         Modal.confirm({
             title: "提示",
             icon: createVNode(ExclamationCircleOutlined),
-            content: `即将为您打开新的标签页( ${item.name} )，是否继续？`,
+            content: `即將為您打開新的標簽頁( ${item.name} )，是否繼續？`,
             onOk() {
                 window.open(item.path, '_blank');
             },

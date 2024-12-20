@@ -20,6 +20,11 @@ interface ImportMetaEnv {
    * 超时时间
    */
   VITE_AXIOS_TIMEOUT: number;
+
+  /**
+   * 打包
+   */
+  VITE_BASE_URL: string;
 }
 
 interface ImportMeta {

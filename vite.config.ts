@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
 import AutoImport from "unplugin-auto-import/vite";
@@ -8,146 +8,165 @@ import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import UnoCSS from "unocss/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 import ViteCompressionPlugin from "vite-plugin-compression";
-import viteImagemin from "vite-plugin-imagemin";
+import type { PreRenderedAsset } from "rollup";
+import type { ConfigEnv, BuildOptions } from "vite";
+import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
+type Recordable<T = any> = Record<string, T>;
 
 const pathSrc = path.resolve(__dirname, "src");
 
-// https://vite.dev/config/
-export default defineConfig({
-  base: "./",
-  plugins: [
-    vue(),
-    visualizer({ open: true }),
-    ViteCompressionPlugin({
-      algorithm: "gzip",
-      ext: ".gz",
-      deleteOriginFile: true,
-    }),
-    viteImagemin({
-      gifsicle: {
-        optimizationLevel: 7,
-        interlaced: false,
+interface ViteEnv {
+  VITE_APP_TITLE: string;
+  VITE_APP_PORT: number;
+  VITE_BASE_URL: string;
+  VITE_AXIOS_BASE_URL: string;
+  VITE_AXIOS_TIMEOUT: number;
+}
+
+// 處理環境變量
+function wrapperEnv(envConf: Recordable): ViteEnv {
+  const ret: any = {};
+
+  for (const envName of Object.keys(envConf)) {
+    let realName = envConf[envName].replace(/\\n/g, "\n");
+    realName =
+      realName === "true" ? true : realName === "false" ? false : realName;
+
+    if (envName === "VITE_APP_PORT") {
+      realName = Number(realName);
+    }
+    if (envName === "VITE_AXIOS_TIMEOUT") {
+      realName = Number(realName);
+    }
+    ret[envName] = realName;
+  }
+  return ret;
+}
+
+// 插件配置
+const vitePlugins = [
+  vue(),
+  UnoCSS(),
+  AutoImport({
+    imports: ["vue"],
+    eslintrc: {
+      enabled: true,
+      filepath: "./.eslintrc-auto-import.json",
+    },
+    dts: path.resolve(pathSrc, "types", "auto-imports.d.ts"),
+  }),
+  Components({
+    dts: path.resolve(pathSrc, "types", "components.d.ts"),
+    resolvers: [
+      AntDesignVueResolver({
+        importStyle: false,
+      }),
+    ],
+  }),
+  createSvgIconsPlugin({
+    iconDirs: [path.resolve(process.cwd(), "src/assets/icons")],
+    symbolId: "icon-[dir]-[name]",
+  }),
+  visualizer({ open: true }),
+  // ViteCompressionPlugin({
+  //   algorithm: "gzip",
+  //   ext: ".gz",
+  //   deleteOriginFile: true,
+  // }),
+  ViteImageOptimizer({
+    jpg: {
+      quality: 75, // 设置 JPEG 图像的压缩质量
+    },
+    png: {
+      quality: 80, // 设置 PNG 图像的压缩质量范围
+    },
+    webp: {
+      quality: 75, // 设置 WebP 图像的压缩质量
+    },
+    exclude: ["**/*.svg"], // 排除 svg 图标
+  }),
+];
+
+// 構建配置
+const buildOptions: BuildOptions = {
+  outDir: "dist",
+  assetsDir: "assets",
+  sourcemap: process.env.NODE_ENV === "development", // 開啟 sourcemap 作用是方便開發者 debug
+  cssCodeSplit: true, // 開啟 CSS 切割
+  assetsInlineLimit: 4096, // 設定 inline 資源的大小上限
+  chunkSizeWarningLimit: 2000, // 設定 chunk 大小警告的大小上限
+  minify: "terser" as const, // 設定 minify 工具
+  terserOptions: {
+    compress: {
+      // 設定 minify 壓縮設定
+      keep_infinity: true,
+      drop_console: process.env.NODE_ENV === "production",
+      drop_debugger: process.env.NODE_ENV === "production",
+    },
+    format: {
+      comments: false, // 移除所有註釋
+    },
+  },
+  rollupOptions: {
+    output: {
+      entryFileNames: "js/[name].[hash].js",
+      chunkFileNames: "js/[name].[hash].js",
+      assetFileNames: (assetInfo: PreRenderedAsset): string => {
+        const fileName = assetInfo.name || "";
+        const info = fileName.split(".");
+        let extType = info[info.length - 1] || "asset";
+
+        if (/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(fileName)) {
+          extType = "media";
+        } else if (/\.(png|jpe?g|gif|svg)(\?.*)?$/.test(fileName)) {
+          extType = "img";
+        } else if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(fileName)) {
+          extType = "fonts";
+        }
+        return `${extType}/[name].[hash].[ext]`;
       },
-      optipng: {
-        optimizationLevel: 7,
-      },
-      mozjpeg: {
-        quality: 20,
-      },
-      pngquant: {
-        quality: [0.8, 0.9],
-        speed: 4,
-      },
-      svgo: {
-        plugins: [
-          {
-            name: "removeViewBox",
-          },
-          {
-            name: "removeEmptyAttrs",
-            active: false,
-          },
-        ],
-      },
-    }),
-    UnoCSS({
-      /* options */
-    }),
-    AutoImport({
-      // 自动导入 Vue 相关函数，如：ref, reactive, toRef 等
-      imports: ["vue"],
-      eslintrc: {
-        enabled: true, // 是否自动生成 eslint 规则，建议生成之后设置 false
-        filepath: "./.eslintrc-auto-import.json", // 指定自动导入函数 eslint 规则的文件
-      },
-      dts: path.resolve(pathSrc, "types", "auto-imports.d.ts"), // 指定自动导入函数TS类型声明文件路径
-    }),
-    Components({
-      dts: path.resolve(pathSrc, "types", "components.d.ts"), // 指定自动导入组件TS类型声明文件路径
-      resolvers: [
-        AntDesignVueResolver({
-          importStyle: false, // css in js
-        }),
-      ],
-    }),
-    createSvgIconsPlugin({
-      // 指定需要缓存的图标文件夹
-      iconDirs: [path.resolve(process.cwd(), "src/assets/icons")],
-      // 指定symbolId格式
-      symbolId: "icon-[dir]-[name]",
-    }),
-  ],
-  css: {
-    // CSS 预处理器
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@use "@/styles/variables.scss" as *;`,
+      manualChunks: {
+        vue: ["vue", "vue-router", "pinia"],
+        "ant-design": ["ant-design-vue"],
       },
     },
   },
-  resolve: {
-    alias: {
-      "@": pathSrc,
-    },
-  },
-  //预加载必要组件，提高首屏加载速度
-  optimizeDeps: {
-    include: ["vue", "vue-router", "pinia", "axios", "ant-design-vue"],
-  },
-  server: {
-    host: "0.0.0.0",
-    port: 3006,
-    open: true, // 启动时是否打开浏览器
-    proxy: {
-      "/api": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
-  },
-  //构建配置
-  build: {
-    outDir: "dist", // 输出目录
-    assetsDir: "assets", // 静态资源目录（相对于outDir）
-    sourcemap: false, // 生产环境下关闭 source map
-    cssCodeSplit: true, // 启用 CSS 代码分割
-    assetsInlineLimit: 4096, // 小于此阈值的导入或引用资源将内联为 base64 编码，以避免额外的 http 请求。设置为 0 可以完全禁用此项。
-    chunkSizeWarningLimit: 2000, // 消除打包大小超过500kb警告
-    minify: "terser", // Vite 2.6.x 以上需要配置 minify: "terser", terserOptions 才能生效 作用是压缩代码
-    terserOptions: {
-      compress: {
-        keep_infinity: true, // 防止 Infinity 被压缩成 1/0，这可能会导致 Chrome 上的性能问题
-        drop_console: true, // 生产环境去除 console
-        drop_debugger: true, // 生产环境去除 debugger
-      },
-      format: {
-        comments: false, // 删除注释
-      },
-    },
-    rollupOptions: {
-      output: {
-        // 用于从入口点创建的块的打包输出格式[name]表示文件名,[hash]表示该文件内容hash值
-        entryFileNames: "js/[name].[hash].js",
-        // 用于命名代码拆分时创建的共享块的输出命名
-        chunkFileNames: "js/[name].[hash].js",
-        // 用于输出静态资源的命名，[ext]表示文件扩展名
-        assetFileNames: (assetInfo: any) => {
-          const info = assetInfo.name.split(".");
-          let extType = info[info.length - 1];
-          // console.log('文件信息', assetInfo.name)
-          if (
-            /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/i.test(assetInfo.name)
-          ) {
-            extType = "media";
-          } else if (/\.(png|jpe?g|gif|svg)(\?.*)?$/.test(assetInfo.name)) {
-            extType = "img";
-          } else if (/\.(woff2?|eot|ttf|otf)(\?.*)?$/i.test(assetInfo.name)) {
-            extType = "fonts";
-          }
-          return `${extType}/[name].[hash].[ext]`;
+};
+
+export default defineConfig(({ mode }: ConfigEnv) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const viteEnv = wrapperEnv(env);
+
+  return {
+    base: viteEnv.VITE_BASE_URL,
+    plugins: vitePlugins,
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@use "@/styles/variables.scss" as *;`,
         },
       },
     },
-  },
+    resolve: {
+      alias: {
+        "@": pathSrc,
+      },
+    },
+    optimizeDeps: {
+      include: ["vue", "vue-router", "pinia", "axios", "ant-design-vue"],
+    },
+    server: {
+      host: "0.0.0.0",
+      port: viteEnv.VITE_APP_PORT,
+      open: true,
+      proxy: {
+        "/api": {
+          target: viteEnv.VITE_AXIOS_BASE_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ""),
+        },
+      },
+    },
+    build: buildOptions,
+  };
 });

@@ -69,10 +69,7 @@ const status = ref<{ status: 'warning' | 'error'; message: string }>({
 });
 const selectWechet = ref(true);
 const disabled = ref(false);
-const from = ref({
-    orderOn: "",
-    payUrl: ''
-});
+
 const showSponser = ref(false);
 const payOk = ref(false);
 const sponsorSelect = [
@@ -80,7 +77,10 @@ const sponsorSelect = [
     { number: 500, text: "額外贈送7%", ew: 0.07 },
     { number: 1000, text: "額外贈送10%", ew: 0.1 },
 ];
-
+const from = ref<{ orderOn: string; payUrl: string }>({
+    orderOn: '',
+    payUrl: ''
+});
 const Pay = async () => {
     disabled.value = true;
     showSponser.value = true;
@@ -91,10 +91,9 @@ const Pay = async () => {
         } else {
             result = await aliPayPay(sponsorNum.value);
         }
-
         if (result.code === 200) {
-            from.value.orderOn = result.data.orderOn;
-            from.value.payUrl = 'data:image/png;base64,' + result.data.payUrl;
+            from.value = JSON.parse(JSON.stringify(result.data));
+            from.value.payUrl = 'data:image/png;base64,' + from.value.payUrl;
         } else {
             message.error(result.message);
         }
@@ -125,6 +124,7 @@ const isOk = async (orderOn: string) => {
         if (res.code === 200) {
             if (res.data === true) {
                 message.success('支付成功');
+                await router.push('/userCenter');
             } else {
                 message.warning('尚未支付成功');
             }

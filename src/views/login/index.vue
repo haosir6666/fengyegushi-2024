@@ -1,7 +1,7 @@
 <template>
-    <a-modal style="width: 500px;" getContainer="body" :title="title" :maskClosable="false" :closable="true"
-        :footer="null" v-model:open="appStore.loginBox">
-        <a-form v-show="appStore.Signed ? false : true" class="mt-7" :model="formState"
+    <a-modal class="fade-slide-enter-active" style="width: 500px;" getContainer="body" :title="title"
+        :maskClosable="false" :closable="true" :footer="null" v-model:open="appStore.loginBox">
+        <a-form v-show="appStore.Signed ? false : true" class="mt-7 fade-slide-enter-active" :model="formState"
             :label-col="{ span: 4, hidden: true }" :wrapper-col="{ span: 18 }" autocomplete="off" @finish="onFinish"
             @finishFailed="onFinishFailed">
             <a-form-item label="賬號" name="username" :rules="[{ required: true, message: '請輸入帳號!' }]"
@@ -45,7 +45,7 @@
                         }}</a></a-button>
             </a-form-item>
         </a-form>
-        <a-form v-show="appStore.Signed ? true : false" class="mt-7" :model="formState"
+        <a-form v-show="appStore.Signed ? true : false" class="mt-7 fade-slide-enter-active" :model="formState"
             :label-col="{ span: 4, hidden: true }" :wrapper-col="{ span: 18 }" autocomplete="off"
             @finish="onLoginFinish" @finishFailed="onFinishFailed">
             <a-form-item label="賬號" name="username" :rules="[{ required: true, message: '請輸入帳號!' }]"
@@ -118,7 +118,9 @@ const sendCode = async () => {
         }
     }
     finally {
-        loading.value = false
+        setTimeout(() => {
+            loading.value = false
+        }, 3000)
     }
 }
 const onLoginFinish = async (values: loginData) => {
