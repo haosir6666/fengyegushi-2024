@@ -122,7 +122,6 @@ const scrollToPage = (index: number) => {
     /* 启用滚动吸附 */
     background: url(@/assets/images/Homebg1.png) no-repeat;
     background-size: cover;
-    background-position: 0% 60%;
 }
 
 .page-item {

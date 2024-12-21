@@ -18,6 +18,7 @@ import router from '@/router';
 const value = ref('horizontal');
 const menu = ref<meunType[]>([
     { name: '首頁', path: '/home', isShow: true, openUrl: false },
+    { name: '個人中心', path: '/userCenter', isShow: true, openUrl: false },
     { name: '關於我們', path: '/redirect', isShow: false, openUrl: false },
     { name: '測試imonials', path: '/about', isShow: false, openUrl: true },
 ])

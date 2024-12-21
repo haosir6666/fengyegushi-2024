@@ -26,7 +26,7 @@
                         class="btns bg-blue-500 cursor-pointer">支付寶</button>
                 </div>
                 <div class="input-box flex justify-center items-center flex-col py-25px">
-                    <p>請輸入贊助金額 :</p>
+                    <p>請輸入贊助金額 比例为(1比<span class="text-red-500">10</span>):</p>
                     <div class="input w-full flex justify-center items-center">
                         <a-input-number :status="status.status" v-model:value="sponsorNum" :min="6" :step="1" max="5000"
                             size="large" class="w-50%" prefix="￥" suffix="RMB" />
